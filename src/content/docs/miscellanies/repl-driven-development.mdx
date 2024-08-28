@@ -1,0 +1,57 @@
+---
+title: REPL-Driven Development
+---
+
+REPL stands for "Read-Eval-Print Loop", which is a program that:
+
+- `R`ead your input
+- `E`valuate it
+- `P`rint the result
+- `L`oop
+
+REPLs are popular in Lisp-family languages like Scheme [^scheme-repl] and
+Clojure [^clojure-repl]. They exist within Python, JavaScript, and many other
+languages as well, albeit not always as prominently as Lisp-family ones
+[^lisp-vs-python-repl]. REPLs play a central role in the REPL-Driven Development
+workflow, similar to how tests are central to Test-Driven Development. The
+primary concept of REPL-Driven Development is to write code in a text editor,
+and then find a way to send it to the REPL to be run. The following diagram
+illustrates this process:
+
+```
++------------------+
+|      EDITOR      |
+|                  +---+
+|                  |   |
++------------------+   | code block
+|       REPL       |   |
+|                  |<--+
+|                  |
++------------------+
+```
+
+In this diagram, the EDITOR can be any text editor, while the REPL refers to the
+specific REPL of the programming language you're using.
+
+For certain content on this site (including posts related to "Software Design
+for Flexibility" [^sdf] and "Structure and Interpretation of Computer Programs"
+[^sicp]), I will use the following tools:
+
+- Neovim [^neovim] as the text editor
+- `vim-slime` [^vim-slime] to send code blocks to the REPL
+- MIT Scheme [^mit-scheme] as the REPL
+
+Here is a demo I've taken from my SICP exercises solving repository
+[^sicp-repo]\:
+
+![REPL-Driven Development Demo](https://github.com/thanhnguyen2187/sicp-notes/raw/master/demo-vim-repl.gif)
+
+[^scheme-repl]: https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-user/REPL.html
+[^clojure-repl]: https://clojure.org/guides/repl/introduction
+[^lisp-vs-python-repl]: https://stackoverflow.com/questions/12253200/how-is-lisps-read-eval-print-loop-different-than-pythons
+[^sdf]: https://mitpress.mit.edu/9780262045490/software-design-for-flexibility/
+[^sicp]: https://mitpress.mit.edu/9780262510875/structure-and-interpretation-of-computer-programs/
+[^neovim]: https://neovim.io/
+[^vim-slime]: https://github.com/jpalardy/vim-slime
+[^mit-scheme]: https://www.gnu.org/software/mit-scheme/
+[^sicp-repo]: https://github.com/thanhnguyen2187/sicp-notes
