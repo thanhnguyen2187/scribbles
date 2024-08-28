@@ -1,0 +1,192 @@
+---
+title: "Exercise 2.2: Arity extension"
+---
+ 
+import { Code } from '@astrojs/starlight/components';
+import codeFinal from '/code/sdf/exercise-answers/2-2.scm?raw';
+
+<details>
+  <summary>Final code</summary>
+  <Code
+    code={codeFinal}
+    lang="scheme"
+    title="2-2.scm"
+  />
+</details>
+
+## Description
+
+> Our exposition of useful combinators is flawed in that the arity mechanism we
+> displayed cannot handle the more general arity mechanism used by MIT/GNU
+> Scheme. For example, the addition procedure, which is the value of `+`, can
+> take any number of arguments:
+>
+> ```scheme
+> (procedure-arity-min (procedure-arity +)) = 0
+> (procedure-arity-max (procedure-arity +)) = #f
+> ```
+>
+> and the artangent procedure can take either 1 or 2 arguments:
+>
+> ```scheme
+> (procedure-arity-min (procedure-arity atan)) = 1
+> (procedure-arity-max (procedure-arity atan)) = 2
+> ```
+>
+> It is useful to extend the handling of arities so that combinators can work
+> with these more complex situations.
+>
+> a. Sketch a plan for how to extend the combinators to use the more general
+> arities. Note that you may not always be able to use arithmetic on the
+> arities. What choice will you have to make in reformulating `spread-combine`?
+> For example, what kinds of restrictions will be needed on the procedures `f`,
+> `g`, and `h` in `spread-combine`?
+>
+> b. Apply your plan and make it all work!
+
+## Analyzing
+
+Let's take a look at the "canonical" implementation of `get-arity`:
+
+```scheme
+(define (get-arity proc)
+  (or (hash-table-ref/default arity-table proc #f)
+      (let ((a (procedure-arity proc)))
+        (assert (eqv? (procedure-arity-min a)
+                      (procedure-arity-max a)))
+        (procedure-arity-min a))))
+```
+
+As showed above, `(get-arity +)` (or other built-in operator like `-`, `+`, `/`)
+won't work since:
+
+```scheme
+(procedure-arity-min (procedure-arity +)) = 0
+(procedure-arity-max (procedure-arity +)) = #f
+```
+
+The exercise requires us to "extend the combinators to use the more general
+arities". There were 3 combinators introduced so far:
+
+```scheme
+(define (compose f g)
+  (define (the-composition . args)
+    (f (apply g args)))
+  the-composition)
+
+(define (parallel-combine h f g)
+  (define (the-combination . args)
+    (h (apply f args) (apply g args)))
+  the-combination)
+
+(define (spread-combine h f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (h (apply f (list-head args n))
+           (apply g (list-tail args n))))
+      (restrict-arity the-combination t))))
+```
+
+Let us also look at the "improved" functions from Exercise 2.1:
+
+```scheme
+(define (compose f g)
+  (let* ((n (get-arity g))
+         (m (get-arity f))
+         (the-composition
+           (lambda args
+             (assert (= n (length args)))
+             (assert (= m 1))
+             (f (g args)))))
+    (restrict-arity the-composition n)
+    the-composition))
+
+(define (parallel-combine h f g)
+  (define (the-combination . args)
+    (let ((n (length args)))
+      (assert (= (get-arity f) n))
+      (assert (= (get-arity g) n))
+      (assert (= (get-arity h) 2)))
+    (h (apply f args)
+       (apply g args)))
+  (restrict-arity the-combination n)
+  the-combination)
+```
+
+It's clear that our version of `compose` works for "simple" cases, where the
+`lambda`s' arities are well-defined:
+
+```scheme
+((compose (lambda (x) (list 'foo x))
+          (lambda (x) (list 'bar x)))
+ 'z)
+
+;Value: (foo (bar (z)))
+```
+
+However, if we replace `f` of the above example with a `list`, we immediately
+get a failure:
+
+```scheme
+((compose list
+          (lambda (x) (list 'bar x)))
+ 'z)
+
+;Assertion failed: (eqv? (procedure-arity-min a) (procedure-arity-max a))
+```
+
+## Implementation
+
+Let's get started with making `compose` works first. It's clear that the
+constraints are:
+
+- `(>= (procedure-arity-min g) 0)`
+- `(=  (procedure-arity-min f) 1)`
+- `(>= (procedure-arity-max f) 1)`
+
+The final composition's arity should also be the same as `g`'s, which means
+we cannot use `restrict-arity` here.
+
+Fixed `compose`:
+
+```scheme
+(define (compose f g)
+  (define (the-composition . args)
+    (f (g args)))
+  (assert (>= (procedure-arity-min (procedure-arity g)) 0))
+  (assert (=  (procedure-arity-min (procedure-arity f)) 0))
+  (assert (or (not (procedure-arity-max (procedure-arity f)))
+              (>= (procedure-arity-max (procedure-arity f)) 1)))
+  the-composition)
+```
+
+A bit more cleaning might be needed, but the idea is to check if
+`(procedure-arity-max f)` is false first, as the situation means `f`'s upper
+arity is unlimited. Testing the failed case above proves that this
+implementation is acceptable:
+
+```scheme
+((compose list
+          (lambda (x) (list 'bar x)))
+ 'z)
+
+;Value: ((bar (z)))
+```
+
+Similarly, we can list the "conditions" for `parallel-combine`:
+
+- `(>= g-arity-min 0)`
+- `(>= f-arity-min 0)`
+- `(= g-arity-min f-arity-min)`
+- `(= g-arity-max f-arity-max)`
+- `(>= h-arity-max 2)`
+
+Which follow the general rule that `g` and `f` should be able to receive the
+same amount of parameters, and `h` must be able to be executed with at least 2
+parameters.
+
+```scheme
+
+```
