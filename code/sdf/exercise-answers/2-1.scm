@@ -3,38 +3,40 @@
 
 ;; quoter:begin:compose
 (define (compose f g)
-  (let* ((n (get-arity g))
-         (m (get-arity f))
-         (the-composition
-           (lambda args
-             (assert (= n (length args)))
-             (assert (= m 1))
-             (f (g args)))))
-    (restrict-arity the-composition n)
-    the-composition))
+  (define (the-composition . args)
+    (assert (= (get-arity g)
+               (length args)))
+    (restrict-arity the-composition (length args))
+    (f (apply g args)))
+  the-composition)
 ;; quoter:end:compose
 
-((compose (lambda (x) (list 'foo x))
-          (lambda (x) (list 'bar x)))
+((compose (lambda (x)
+            (list 'foo x))
+          (lambda (x)
+            (list 'bar x)))
  'z)
+
+;Value: (foo (bar z))
 
 ;; quoter:begin:parallel-combine
 (define (parallel-combine h f g)
   (define (the-combination . args)
-    (let ((n (length args)))
-      (assert (= (get-arity f) n))
-      (assert (= (get-arity g) n))
-      (assert (= (get-arity h) 2)))
     (h (apply f args)
        (apply g args)))
-  (restrict-arity the-combination n)
+  (let ((n1 (get-arity f))
+        (n2 (get-arity g)))
+    (assert (= n1 n2))
+    (restrict-arity the-combination n1))
   the-combination)
 ;; quoter:end:parallel-combine
 
-((parallel-combine (lambda (a b) (list a b))
-                   (lambda (x y z) (list 'foo x y z))
-                   (lambda (u v w) (list 'bar u v w)))
+((parallel-combine list
+                   (lambda (x y z)
+                     (list 'foo x y z))
+                   (lambda (u v w)
+                     (list 'bar u v w)))
  'a 'b 'c)
 
+;; run tests if possible
 ; (manage 'run-tests)
-

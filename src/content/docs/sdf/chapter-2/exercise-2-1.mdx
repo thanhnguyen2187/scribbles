@@ -1,0 +1,82 @@
+---
+title: "Exercise 2.1: Arity repair"
+---
+ 
+import { Code } from '@astrojs/starlight/components';
+import CodeQuoter from '/src/components/CodeQuoter.astro';
+
+<details>
+  <summary>Final code</summary>
+  <CodeQuoter
+    filePath="/code/sdf/exercise-answers/2-1.scm"
+  />
+</details>
+
+## Description
+
+> The procedures *compose* and *parallel-combine* that we have introduced do not
+> obey the requirement that they advertise the arity of the combination. Thus
+> they would not be good citizens of our family of combinators. Fix the
+> implementation of *compose* and *parallel-combine* shown above, so that:
+> 
+> - they check their components to make sure that the arities are compatible;
+> - the combination they construct checks that it is given the correct number of
+> arguments when it is called;
+> - the combination advertises its arity correctly for *get-arity*.
+
+## Analyzing
+
+There is an example from the text on how to do that with `spread-combine`:
+
+- The "before" version:
+
+```scheme
+(define (spread-combine h f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (h (apply f (list-head args n))
+           (apply g (list-tail args n))))
+      the-combination)))
+```
+
+- The "after" version:
+
+```scheme
+(define (spread-combine h f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (h (apply f (list-head args n))
+           (apply g (list-tail args n))))
+      (restrict-arity the-combination t))))
+```
+
+We can notice the usage of
+
+- `get-arity`, and
+- `restrict-arity`
+
+Which should guide us on how to actually implement the "fixed" functions.
+
+## Implementation
+
+### `compose`
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-1.scm"
+  id="compose"
+  lang="scheme"
+/>
+
+### `parallel-combine`
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-1.scm"
+  id="parallel-combine"
+  lang="scheme"
+/>
+
+...
+

@@ -11,6 +11,7 @@ const {
   language?: string;
 } = Astro.props;
 // noinspection TypeScriptCheckImport
+/* @vite-ignore */
 const module = await import(`${filePath}?raw`);
 const textRaw: string = module.default;
 
