@@ -1,0 +1,120 @@
+---
+title: "Exercise 2.3: A quickie"
+---
+ 
+import { Code } from '@astrojs/starlight/components';
+import CodeQuoter from '/src/components/CodeQuoter.astro';
+
+<details>
+  <summary>Final code</summary>
+  <CodeQuoter
+    filePath="/code/sdf/exercise-answers/2-3.scm"
+  />
+</details>
+
+## Description
+
+> Reformulate `parallel-combine` to be a composition of two parts and allow the
+> parts to return multiple values.
+
+## Analyzing
+
+A quick reminder of `parallel-combine`:
+
+```scheme
+(define (parallel-combine h f g)
+  (define (the-combination . args)
+    (h (apply f args) (apply g args)))
+  the-combination)
+```
+
+"Multiple values" has its own section, where the author shows us how to
+implement `spread-combine` using a new implementation of `compose` and a new
+function, `spread-apply`.
+
+```scheme
+(define (spread-combine h f g)
+  (compose h (spread-apply f g)))
+
+(define (compose f g)
+  (define (the-composition . args)
+    (call-with-values (lambda () (apply g args))
+                      f))
+  (restrict-arity the-composition (get-arity g)))
+
+(define (spread-apply f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (values (apply f (list-head args n))
+                (apply g (list-tail args n))))
+      (restrict-arity the-combination t))))
+```
+
+An important bit that was under-mentioned is the `call-with-values` usage:
+
+```scheme {3,4}
+(define (compose f g)
+  (define (the-composition . args)
+    (call-with-values (lambda () (apply g args))
+                      f))
+  (restrict-arity the-composition (get-arity g)))
+```
+
+The "original" `compose` implementation looks like this (the actual composing
+is highlighted):
+
+```scheme {3}
+(define (compose f g)
+  (define (the-composition . args)
+    (f (apply g args)))
+  the-composition)
+```
+
+The writing above should clarify us how `(call-with-values … f)` replaces `(f
+…)`. The author did not fully explain why should we use `values` instead of
+returning a list and apply it. I have no idea why either. Let's hope that this
+part can be revised later.
+
+> We could do [return multiple values ... and then use those multiple values] by
+> returning a compound data structure, but a better way is to use the Scheme
+> multiple-value return mechanism.
+
+There is also the "version 2" of `spread-apply`, where `let-values` is used:
+
+```scheme {6-7,15-17}
+(define (spread-apply f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (values (apply f (list-head args n))
+                (apply g (list-tail args n))))
+      (restrict-arity the-combination t))))
+
+(define (spread-apply f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (let-values ((fv (apply f (list-head args n)))
+                     (gv (apply g (list-tail args n))))
+          (apply values (append fv gv))))
+      (restrict-arity the-combination t))))
+```
+
+## Implementation
+
+### `function-1`
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/template.scm"
+  id="function-1"
+  lang="scheme"
+/>
+
+### `function-2`
+
+...
+
