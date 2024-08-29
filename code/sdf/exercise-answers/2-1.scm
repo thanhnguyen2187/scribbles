@@ -1,6 +1,7 @@
 (load "./sdf/manager/load")
 (manage 'new-environment 'combinators)
 
+;; quoter:begin:compose
 (define (compose f g)
   (let* ((n (get-arity g))
          (m (get-arity f))
@@ -11,11 +12,13 @@
              (f (g args)))))
     (restrict-arity the-composition n)
     the-composition))
+;; quoter:end:compose
 
 ((compose (lambda (x) (list 'foo x))
           (lambda (x) (list 'bar x)))
  'z)
 
+;; quoter:begin:parallel-combine
 (define (parallel-combine h f g)
   (define (the-combination . args)
     (let ((n (length args)))
@@ -26,6 +29,7 @@
        (apply g args)))
   (restrict-arity the-combination n)
   the-combination)
+;; quoter:end:parallel-combine
 
 ((parallel-combine (lambda (a b) (list a b))
                    (lambda (x y z) (list 'foo x y z))

@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { fileURLToPath } from "node:url";
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,7 +14,10 @@ export default defineConfig({
         {
           label: "Miscellanies",
           items: [
-            { label: "REPL-Driven Development", slug: "miscellanies/repl-driven-development" },
+            {
+              label: "REPL-Driven Development",
+              slug: "miscellanies/repl-driven-development",
+            },
           ],
         },
         {

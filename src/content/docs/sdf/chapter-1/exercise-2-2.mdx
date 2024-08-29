@@ -3,14 +3,12 @@ title: "Exercise 2.2: Arity extension"
 ---
  
 import { Code } from '@astrojs/starlight/components';
-import codeFinal from '/code/sdf/exercise-answers/2-2.scm?raw';
+import CodeQuoter from '/src/components/CodeQuoter.astro';
 
 <details>
   <summary>Final code</summary>
-  <Code
-    code={codeFinal}
-    lang="scheme"
-    title="2-2.scm"
+  <CodeQuoter
+    filePath="/code/sdf/exercise-answers/2-2.scm"
   />
 </details>
 
@@ -91,29 +89,17 @@ arities". There were 3 combinators introduced so far:
 
 Let us also look at the "improved" functions from Exercise 2.1:
 
-```scheme
-(define (compose f g)
-  (let* ((n (get-arity g))
-         (m (get-arity f))
-         (the-composition
-           (lambda args
-             (assert (= n (length args)))
-             (assert (= m 1))
-             (f (g args)))))
-    (restrict-arity the-composition n)
-    the-composition))
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-1.scm"
+  id="compose"
+  lang="scheme"
+/>
 
-(define (parallel-combine h f g)
-  (define (the-combination . args)
-    (let ((n (length args)))
-      (assert (= (get-arity f) n))
-      (assert (= (get-arity g) n))
-      (assert (= (get-arity h) 2)))
-    (h (apply f args)
-       (apply g args)))
-  (restrict-arity the-combination n)
-  the-combination)
-```
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-1.scm"
+  id="parallel-combine"
+  lang="scheme"
+/>
 
 It's clear that our version of `compose` works for "simple" cases, where the
 `lambda`s' arities are well-defined:
@@ -137,35 +123,43 @@ get a failure:
 ;Assertion failed: (eqv? (procedure-arity-min a) (procedure-arity-max a))
 ```
 
+For `compose`, to make `g` and `f` work with more general arities, we will have
+to leverage `procedure-arity-min` and `procedure-arity-max` instead of
+`get-arity` to restrict the constraints. To fully solve the exercise, we apply
+the same process to `parallel-combine` and `spread-combine`.
+
 ## Implementation
 
-Let's get started with making `compose` works first. It's clear that the
-constraints are:
+### `compose`
 
-- `(>= (procedure-arity-min g) 0)`
-- `(=  (procedure-arity-min f) 1)`
-- `(>= (procedure-arity-max f) 1)`
+Let's get started with making `compose` works first. Let's look at execution
+part of `compose`:
 
-The final composition's arity should also be the same as `g`'s, which means
-we cannot use `restrict-arity` here.
-
-Fixed `compose`:
-
-```scheme
+```scheme "(f (apply g args))"
 (define (compose f g)
   (define (the-composition . args)
-    (f (g args)))
-  (assert (>= (procedure-arity-min (procedure-arity g)) 0))
-  (assert (=  (procedure-arity-min (procedure-arity f)) 0))
-  (assert (or (not (procedure-arity-max (procedure-arity f)))
-              (>= (procedure-arity-max (procedure-arity f)) 1)))
+    (f (apply g args)))
   the-composition)
 ```
 
-A bit more cleaning might be needed, but the idea is to check if
-`(procedure-arity-max f)` is false first, as the situation means `f`'s upper
-arity is unlimited. Testing the failed case above proves that this
-implementation is acceptable:
+We need to ensure that:
+
+- `g`'s arity fits `args`, and
+- `f`'s arity is at least 1
+
+It leads to this rather "verbose" implementation:
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-2.scm"
+  id="compose"
+  lang="scheme"
+/>
+
+A reminder on why we need to check `(not g-arity-max)`: if the function can
+receive an unlimited amount of parameter, `procedure-arity-max` would return
+`#f` instead of a number.
+
+Let's check with the failed case above:
 
 ```scheme
 ((compose list
@@ -175,18 +169,65 @@ implementation is acceptable:
 ;Value: ((bar (z)))
 ```
 
-Similarly, we can list the "conditions" for `parallel-combine`:
+### `parallel-combine`
 
-- `(>= g-arity-min 0)`
-- `(>= f-arity-min 0)`
-- `(= g-arity-min f-arity-min)`
-- `(= g-arity-max f-arity-max)`
-- `(>= h-arity-max 2)`
+Now that new `compose` worked, we can move to `parallel-combine`. Let's look at
+the execution part of `parallel-combine`:
 
-Which follow the general rule that `g` and `f` should be able to receive the
-same amount of parameters, and `h` must be able to be executed with at least 2
-parameters.
+```scheme "(h (apply f args) (apply g args))"
+(define (parallel-combine h f g)
+  (define (the-combination . args)
+    (h (apply f args) (apply g args)))
+  the-combination)
+```
+
+What we have to check is:
+
+- `f` must be able to fully receive `args`
+- The same goes with `g`
+- `h` must be able to receive at least 2 parameters
+
+Thus the implementation:
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-2.scm"
+  id="parallel-combine"
+  lang="scheme"
+/>
+
+### `spread-combine`
+
+Similarly, we look at the application part of `spread-combine`.
+
+```scheme {6,7}
+(define (spread-combine h f g)
+  (let ((n (get-arity f)) (m (get-arity g)))
+    (let ((t (+ n m)))
+      (define (the-combination . args)
+        (assert (= (length args) t))
+        (h (apply f (list-head args n))
+           (apply g (list-tail args n))))
+      (restrict-arity the-combination t))))
+```
+
+The problem is a bit more... nuanced here. If `f` has no fixed arity, it means
+as the library author, we cannot know the true intention of the library user
+when he or she passes us a varied arity function. For example, look at this code
+snippet and its evaluation:
 
 ```scheme
-
+((spread-combine list + -) 1 2 3 4 5 6)
+; (list (apply + args-1)
+;       (apply - args-2))
 ```
+
+Since `+` takes any number of parameters, `args-1` is indetermined, and so is
+`args-2`. Our best bet is to fix `f`'s arity. `g`'s arity can follow then.
+
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-2.scm"
+  id="spread-combine"
+  lang="scheme"
+/>
+
+

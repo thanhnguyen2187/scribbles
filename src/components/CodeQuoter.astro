@@ -1,0 +1,23 @@
+---
+import { Code } from "@astrojs/starlight/components";
+import { extractBySection } from './code-quoter';
+const {
+  filePath,
+  id = "all",
+  language = "scheme",
+}: {
+  filePath: string;
+  id?: string;
+  language?: string;
+} = Astro.props;
+// noinspection TypeScriptCheckImport
+const module = await import(`${filePath}?raw`);
+const textRaw: string = module.default;
+
+const text = extractBySection(textRaw, id);
+---
+
+<Code
+  code={text}
+  lang={language}
+/>
