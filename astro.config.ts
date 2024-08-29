@@ -25,8 +25,8 @@ export default defineConfig({
           items: [
             { slug: "sdf/100-index" },
             {
-              label: "Chapter 1",
-              autogenerate: { directory: "sdf/chapter-1" },
+              label: "Chapter 2",
+              autogenerate: { directory: "sdf/chapter-2" },
             },
           ],
         },
