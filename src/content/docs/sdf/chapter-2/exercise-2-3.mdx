@@ -1,7 +1,7 @@
 ---
 title: "Exercise 2.3: A quickie"
 ---
- 
+
 import { Code } from '@astrojs/starlight/components';
 import CodeQuoter from '/src/components/CodeQuoter.astro';
 
@@ -104,6 +104,15 @@ There is also the "version 2" of `spread-apply`, where `let-values` is used:
       (restrict-arity the-combination t))))
 ```
 
+A quick search yielded me this post from
+[docs.scheme.org](https://docs.scheme.org/guide/multiple-values/), which is
+about both "multiple values". The author mentioned `let-values` as well, with an
+interesting quote about continuation [^continuation-rabbit-hole]. For now, let's
+give our focus back to "multiple values" and `let-values`.
+
+> `let-values` - used like `let`, but binds values to identifiers
+
+
 ## Implementation
 
 ### `function-1`
@@ -117,4 +126,16 @@ There is also the "version 2" of `spread-apply`, where `let-values` is used:
 ### `function-2`
 
 ...
+
+[^continuation-rabbit-hole]: https://docs.scheme.org/guide/multiple-values/
+
+    Right on the start of the article, there is an intriguing quote:
+
+    > At its core, Scheme’s evaluation semantics is multiple-value based.
+    > Continuations can accept an arbitrary number of values and expressions can
+    > yield an arbitrary number of values. This is in contrast to the functional
+    > languages ML and Haskell.
+    
+    I think "continuation" was mentioned in SICP, but I cannot recall the definition
+    too well. It should be the rabbit hole for another time.
 
