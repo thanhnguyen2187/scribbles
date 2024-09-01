@@ -19,15 +19,6 @@ import CodeQuoter from '/src/components/CodeQuoter.astro';
 
 ## Analyzing
 
-A quick reminder of `parallel-combine`:
-
-```scheme
-(define (parallel-combine h f g)
-  (define (the-combination . args)
-    (h (apply f args) (apply g args)))
-  the-combination)
-```
-
 "Multiple values" has its own section, where the author shows us how to
 implement `spread-combine` using a new implementation of `compose` and a new
 function, `spread-apply`.
@@ -72,7 +63,7 @@ is highlighted):
   the-composition)
 ```
 
-The writing above should clarify us how `(call-with-values … f)` replaces `(f
+The comparison above should clarify us how `(call-with-values … f)` replaces `(f
 …)`. The author did not fully explain why should we use `values` instead of
 returning a list and apply it. I have no idea why either. Let's hope that this
 part can be revised later.
@@ -83,7 +74,8 @@ part can be revised later.
 
 There is also the "version 2" of `spread-apply`, where `let-values` is used:
 
-```scheme {6-7,15-17}
+```scheme {7-8,17-19}
+;; version 1
 (define (spread-apply f g)
   (let ((n (get-arity f)) (m (get-arity g)))
     (let ((t (+ n m)))
@@ -93,6 +85,7 @@ There is also the "version 2" of `spread-apply`, where `let-values` is used:
                 (apply g (list-tail args n))))
       (restrict-arity the-combination t))))
 
+;; version 2
 (define (spread-apply f g)
   (let ((n (get-arity f)) (m (get-arity g)))
     (let ((t (+ n m)))
@@ -112,20 +105,46 @@ give our focus back to "multiple values" and `let-values`.
 
 > `let-values` - used like `let`, but binds values to identifiers
 
+Going back to making `parallel-combine` works, we should look at the "basic"
+implementation of it:
+
+```scheme
+(define (parallel-combine h f g)
+  (define (the-combination . args)
+    (h (apply f args) (apply g args)))
+  the-combination)
+```
+
+We were asked to make it
+
+> - a composition of two parts, and
+> - allow the parts to return multiple values
+
+Which means we should somehow make use of `compose` and `values` and
+`let-values` as needed.
 
 ## Implementation
 
-### `function-1`
+### `parallel-combine`
+
+The final implementation is quite similar to `spread-combine`:
 
 <CodeQuoter
-  filePath="/code/sdf/exercise-answers/template.scm"
-  id="function-1"
+  filePath="/code/sdf/exercise-answers/2-3.scm"
+  id="parallel-combine"
   lang="scheme"
 />
 
-### `function-2`
+There is a newly-defined `combine-apply`, which is similar to `spread-apply` as
+well [^strange-error]:
 
-...
+<CodeQuoter
+  filePath="/code/sdf/exercise-answers/2-3.scm"
+  id="combine-apply"
+  lang="scheme"
+/>
+
+---
 
 [^continuation-rabbit-hole]: https://docs.scheme.org/guide/multiple-values/
 
@@ -136,6 +155,27 @@ give our focus back to "multiple values" and `let-values`.
     > yield an arbitrary number of values. This is in contrast to the functional
     > languages ML and Haskell.
     
-    I think "continuation" was mentioned in SICP, but I cannot recall the definition
-    too well. It should be the rabbit hole for another time.
+    I think "continuation" was mentioned in SICP, but I cannot recall the
+    definition too well. It should be the rabbit hole for another time.
 
+[^strange-error]: I hit a very strange error with another implementation, where:
+
+    - `restrict-arity` doesn't get respected,
+    - which stops `get-arity` from working,
+    - and `compose` is broke as a result.
+
+    ```scheme "(get-arity g)" "(restrict-arity the-combination (length args))"
+    (define (combine-apply f g)
+      (define (the-combination . args)
+        (restrict-arity the-combination (length args))
+        (let-values ((fv (apply f args))
+                     (gv (apply g args)))
+          (apply values (append fv gv))))
+      the-combination)
+
+    (define (compose f g)
+      (define (the-composition . args)
+        (call-with-values (lambda () (apply g args))
+                          f))
+      (restrict-arity the-composition (get-arity g)))
+    ```
