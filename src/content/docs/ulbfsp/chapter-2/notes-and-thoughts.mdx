@@ -1,0 +1,45 @@
+---
+title: "Notes and Thoughts"
+---
+
+## Measuring the Size of the Supremum
+
+A precondition is that the processes are
+[centered](../terminology.mdx#centered-processes):
+
+> $$
+> \mathsf{E}(X_t) = 0 \quad \forall t \in T
+> $$
+
+About "size of processes":
+
+> We will measure "size of the process $(X_t)_{t \in T}$" by the
+> quantity $\mathsf{E}(\text{sup}_{t \in T}X_t)$. Why this quantity is a good
+> measure of "size of the process" is explained in Lemma 2.2.1.
+
+The mentioned Lemma 2.2.1:
+
+> *If the process $(X_t)_{t \in T}$ is symmetric then*
+>
+> $$
+> \mathsf{E}(\text{sup}_{s,t \in T} | X_s - X_t |) = 2 \mathsf{E}(sup_{t \in T} X_t)
+> $$
+
+[Symmetric processes](../terminology.mdx#symmetric-processes) are also
+explained:
+
+> A process $(X_t)_{t \in T}$ is symmetric if it has the same law as the process
+> $(-X_t)_{t \in T}$.
+
+I find the explanations quite hard to follow and a simpler explanation might be
+easier to grasp, so here we go:
+
+- Suppose we have a symmetric process, it means if we draw a distribution graph
+  of the process, it can be "equally" splitted to two halves
+- The lemma says that the maximum difference between two points in the process
+  $\mathsf{E}(\text{sup}_{s,t \in T} | X_s - X_t |)$ is doubled of the maximal
+  value of the process $\mathsf{E}(sup_{t \in T} X_t)$.
+- An intuition to understand this is to imagine our process as many points in a
+  line, and the "highest" value is $x$. Since the process is symmetric, there
+  must be a $-x$ as well. Distance between $x$ and $-x$ is $2x$, which is
+  doubled of $x$.

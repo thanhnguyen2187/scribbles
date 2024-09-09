@@ -1,0 +1,201 @@
+---
+title: "Terminology"
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+## Stochastic Process
+
+A stochastic process is a collection of random variables indexed by an index
+set. The set often represents time or space, but can be more abstract. For
+example:
+
+- A Markov chain modeling daily stock prices would have the index set $T = Z$.
+- Random fields modeling spatial phenomena like temperature distribution would
+have the index set $T = \mathsf{R}^2 \vee \mathsf{R}^3$ (2D or 3D space).
+
+## Chaining
+
+For chaining, the basic idea is to approximate the entire process by a sequence
+of simpler, finite approximations. A formula was mentioned in the book's first
+chapter:
+
+$$
+X_t - X_{t_0} = \sum{(X_{\pi_n(t)} - X_{\pi_{n-1}(t)})}
+$$
+
+- $t$: an element of the index set $T$.
+- $X_t$: a value of the stochastic process at point $t$.
+- $X_{t_0}$: the value at an initial point. The specific choice of $t_0$ is less
+important than the structure it provides for the chaining argument. It can
+either be the first variable of the process, or an arbitrary choice, or a
+convenient point for simpler calculation, or "zero point", when the index set
+has a natural origin like time.
+- $X_{pi_n(t)}$: the $n$th approximation of the point $t$.
+
+<Aside type="caution">TODO: test on a "real" calculation if the choice of
+$X_{t_0}$ matters.</Aside>
+
+A simpler explanation is:
+
+1. Imagine the process as a complex, continuous object that we want to
+understand.
+2. We can't look at every possible point of this object, so we create a series
+of approximations:
+    - Start with a very coarse approximation (like looking at the object from
+    far away, or pick one of many random variables).
+    - Gradually refine this approximation (like zooming in step by step, or
+    continuously adding other random variables).
+3. At each step, connect our current approximation to the next, finer
+approximation. This forms a "chain" of approximations, and hence the name
+"chaining".
+
+## The Kolmogorov Conditions
+
+The author wrote that a process $(X_t)$, with $t \in T$, and $T = [0, 1]^m$,
+satisfies the Kolmogorov conditions if:
+
+$$
+\mathsf{E}(|X_s - X_t|^p) \leq d(s, t)^\alpha \quad \forall s, t \in [0, 1]^m
+$$
+
+- $[0, 1]^m$ is a "m-dimensional unit cube". It is used for generalization and
+standardization of the index set. For example, time as the index set is only
+1-dimensional and have different ranges depends on the convention. It is obvious
+that 2D space would be 2-dimensional, and 3D space would be 3-dimensional.
+- $s$ and $t$'s meaning seems to be more obvious after we understand $[0, 1]^m$:
+they some "point"s in the index set.
+- $\mathsf{E}$ denotes mathematical expectation, which is the value you would
+"expect" to get on average if you repeated a random experiment a large number of
+times. For example, rolling a fair six-sided die would yield us $(1 + 2 + 3 +
+4 + 5 + 6)/6 = 3.5$.
+- $d(s, t)$ is the Euclidean distance, and $p > 0$, and $\alpha > m$.
+
+If a process satisfies the Kolmogorov conditions, it essentially means that the
+process has certain regularity or smoothness properties. In practical terms,
+processes satisfying Kolmogorov conditions are "well-behaved" enough to model
+many real-world phenomena and are mathematically tractable enough to analyze in
+depth.
+
+I find this next chapter's excerpt related to Kolmogorov conditions interesting:
+
+> A specific feature of the index set $T = [0, 1]^m$ (...) occurring in the
+Kolmogorov conditions is that it is really "m-dimensional", and "the same around
+each point". This is not the case for index sets which occur in a great many
+natural situations. If one had to summarize in one sentence the content of the
+upper bounds presented in this book, it would be that they develop methods which
+are optimal even when this feature does not occur.
+
+## Gaussian Processes
+
+A Gaussian process is a collection of random variables $(X_t)_{t∈T}$, where T is
+some index set, such that any finite collection of these random variables has a
+multivariate normal distribution.
+
+## Metric Space
+
+A metric space consists of two components:
+
+- A set of points (often denoted $X$).
+- A distance function (or metric) $d$ that defines distances between pairs of
+points in the set.
+
+The distance function must satisfy certain properties:
+
+|                            |                                                         |
+| ---                        | ---                                                     |
+| Identity of indiscernibles | $d(x, y) = 0 \Leftrightarrow x = y$                     |
+| Non-negativity             | $d(x, y) \geq 0 \quad \forall x, y \in X$               |
+| Symmetry                   | $d(x, y) = d(y, x) \quad \forall x, y \in X$            |
+| Triangular inequality      | $d(x,z) \leq d(x,y) + d(y,z) \quad \forall x,y,z \in X$ |
+
+## Supremum
+
+In simple terms, the supremum is the least upper bound of a set of numbers. An
+everyday analogy might help understanding: imagine you're looking at the prices
+of a product in different stores. The supremum would be the highest price you've
+seen, even if no store actually charges that exact price.
+
+Normally, calculating the supremum (or $\mathsf{sup}$) of a set or function
+involves finding the least upper bound - the smallest value that is greater than
+or equal to all elements in the set or all values of the function. For finite
+sets or simple functions, this can often be done by direct comparison. For more
+complex situations, especially in the context of stochastic processes, it often
+involves theoretical bounds and estimates rather than exact calculations.
+
+## Expectation
+
+The expectation (or expected value), often denoted as $\mathsf{E}$ or $\mu$ of
+a random variable $X$ is the average value of $X$ over many repetitions of an
+experiment. It represents the "center" or "average" of a probability
+distribution. For a discrete random variable $X$ with possible values $x_i$ and
+corresponding probabilities $p_i$, the expectation is: $\mathsf{E}(X) =
+\sigma{x_i * p_i}$. Some properties of expectation:
+
+|                             |                                                             |
+| ---                         | ---                                                         |
+| Linearity                   | $\mathsf{E}(aX + b) = a\mathsf{E}(X) + b$                   |
+| Additivity                  | $\mathsf{E}(X + Y) = \mathsf{E}(X) + \mathsf{E}(Y)$         |
+| For independent $X$ and $Y$ | $\mathsf{E}(X \cdot Y) = \mathsf{E}(X) \cdot \mathsf{E}(Y)$ |
+
+An useful law relating to expectation is the Law of Large Numbers: as the number
+of independent trials increases, the sample mean converges to the expected
+value.
+
+## Centered Processes
+
+The author gave us this formula in section 2.2:
+
+$$
+\mathsf{E}X_t = 0 \quad \forall t \in T
+$$
+
+The expected value (or mean) of each random variable $X_t$ in the process is
+zero. This assumption simplifies many calculations and theoretical
+considerations, but not always crucial, as many results can be extended to
+non-centered processes by considering the centered version $X_t -
+\mathsf{E}X_t$.
+
+For a more concrete example, consider daily temperature measurements in a city
+over a year. Instead of using the raw temperature data, meteorologists might:
+
+- Calculate the average temperature for each calendar day based on historical data
+(the average temperatures over the past 30 years),
+- Subtract this historical average from the actual temperature to get
+temperature anomalies (+3&deg;C or -2&deg;C).
+
+The act helps with identifying unusually warm or cold periods, or study
+temperature trends without seasonal effects, or compare temperature patterns
+across different regions.
+
+## Symmetric Processes
+
+A symmetric process, in the context of stochastic processes, is a concept that
+captures a form of distributional symmetry over time or space. A stochastic
+process $(X_t)_{t \in T}$ is called symmetric if
+
+- For any finite set of time points or indices $t, t_1, t_2, ..., t_n \in T$,
+- The joint distribution of $X_{t_1}, X_{t_2}, \ldots, X_{t_n}$ is identical to the
+joint distribution of $-X_{t_1}, -X_{t_2}, \ldots, -X_{t_n}$.
+
+Intuitively, it means that if you were to "flip" the sign of all values in any
+sample path of the process, the resulting path would be just as likely to occur
+as the original.
+
+Some properties of the processes:
+
+- The marginal distribution of $X_t$ for any $t$ is symmetric around 0.
+- The expected value of $X_t$, if it exists, is $0$ for all $t$.
+- Odd moments of the process, if they exist, are zero.
+
+## Empirical Processes
+
+The term "empirical" refers to the fact that we're using observed data to
+estimate or approximate some theoretical quantity.
+
+<Aside type="caution">TODO: do more researching.</Aside>
+
+## Selector Processes
+
+<Aside type="caution">TODO: do more researching.</Aside>
+
