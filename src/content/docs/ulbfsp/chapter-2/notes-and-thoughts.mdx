@@ -2,7 +2,7 @@
 title: "Notes and Thoughts"
 ---
 
-## Measuring the Size of the Supremum
+## 2.2 Measuring the Size of the Supremum
 
 A precondition is that the processes are
 [centered](../terminology.mdx#centered-processes):
@@ -22,7 +22,7 @@ The mentioned Lemma 2.2.1:
 > *If the process $(X_t)_{t \in T}$ is symmetric then*
 >
 > $$
-> \mathsf{E}(\text{sup}_{s,t \in T} | X_s - X_t |) = 2 \mathsf{E}(sup_{t \in T} X_t)
+> \mathsf{E}(\text{sup}_{s,t \in T} | X_s - X_t |) = 2 \mathsf{E}(\text{sup}_{t \in T} X_t)
 > $$
 
 [Symmetric processes](../terminology.mdx#symmetric-processes) are also
@@ -37,9 +37,60 @@ easier to grasp, so here we go:
 - Suppose we have a symmetric process, it means if we draw a distribution graph
   of the process, it can be "equally" splitted to two halves
 - The lemma says that the maximum difference between two points in the process
-  $\mathsf{E}(\text{sup}_{s,t \in T} | X_s - X_t |)$ is doubled of the maximal
-  value of the process $\mathsf{E}(sup_{t \in T} X_t)$.
+  $\mathsf{E} \space \text{sup}_{s,t \in T} | X_s - X_t |$ is doubled of the maximal
+  value of the process $\mathsf{E} \space \text{sup}_{t \in T} X_t$.
 - An intuition to understand this is to imagine our process as many points in a
   line, and the "highest" value is $x$. Since the process is symmetric, there
   must be a $-x$ as well. Distance between $x$ and $-x$ is $2x$, which is
   doubled of $x$.
+
+## 2.3 The Union Bound and Other Basic Facts
+
+> Give any $t_0$ in $T$, the centering hypothesis (2.1) implies
+>
+> $$
+> \mathsf{E}\space\text{sup}_{t \in T} X_t = \mathsf{E}\space\text{sup}_{t \in T}(X_t - X_{t_0})
+> $$
+
+To prove it mathematically:
+
+$$
+\begin{align}
+&\mathsf{E}\space\text{sup}_{t \in T}(X_t - X_{t_0}) \\
+=\space &\mathsf{E}[\text{sup}_{t \in T}X_t - X_{t_0}] \\
+=\space &\mathsf{E}\space\text{sup}_{t \in T}X_t - \mathsf{E}\space X_{t_0} \\
+=\space &\mathsf{E}\space\text{sup}_{t \in T}X_t - 0 \\
+=\space &\mathsf{E}\space\text{sup}_{t \in T}X_t
+\end{align}
+$$
+
+We have $\mathsf{E} X_{t_0} = 0$ since it is a centered process.
+
+The intuition behind it can be explained like this:
+
+- Suppose we have a set of numbers
+- We subtract the numbers' values by a random amount to get another set
+- The maximal of the first set of numbers and the second set of numbers is the
+  same, if the random amount is 0
+
+> [...] nonnegativer r.v. $Y = \text{sup}_{t \in T}(X_t - X_{t_0})$. [...], we
+> have the formula:
+>
+> $$
+> \mathsf{E}Y = \int_0^{\infty} \mathsf{P}(Y \geq u)\text{d}x
+> $$
+
+The author did not elaborate what is $P$, but P denotes probability, and the
+formula itself is known as the "layer cake representation" or sometimes as the
+"tail formula" for expectation. The intuition behind this formula is that it
+"slices" the random variable into layers and sums up the probability of each
+layer, which gives the expected value. In the end, we are led to [Markov's
+Inequality](../terminology.mdx#markovs-inequality), which states that:
+
+$$
+\mathsf{P}(Y \geq a) \leq \frac{\mathsf{E} Y}{a}
+$$
+
+And a consequence
+
+

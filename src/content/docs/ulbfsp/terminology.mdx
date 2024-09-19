@@ -116,12 +116,29 @@ everyday analogy might help understanding: imagine you're looking at the prices
 of a product in different stores. The supremum would be the highest price you've
 seen, even if no store actually charges that exact price.
 
-Normally, calculating the supremum (or $\mathsf{sup}$) of a set or function
+Normally, calculating the supremum (or $\text{sup}$) of a set or function
 involves finding the least upper bound - the smallest value that is greater than
 or equal to all elements in the set or all values of the function. For finite
 sets or simple functions, this can often be done by direct comparison. For more
 complex situations, especially in the context of stochastic processes, it often
 involves theoretical bounds and estimates rather than exact calculations.
+
+In the simplest case, where we're dealing with a finite set of real numbers, the
+supremum $\text{sup}$ is indeed equivalent to the maximum (max) of that set. For
+example, if we have a set $S = {1, 2, 3, 4, 5}$, then:
+
+$$
+\text{sup}(S) = \text{max}(S) = 5
+$$
+
+The concept of supremum becomes more nuanced and important when dealing with:
+
+- Infinite sets
+- Sets that don't have a maximum value but have an upper bound
+
+For instance, for the set of all real numbers less than 1, $\{x \in R
+\space|\space x < 1\}$, the supremum is 1, even though 1 itself is not in the
+set. There is no maximum in this case.
 
 ## Expectation
 
@@ -141,6 +158,16 @@ corresponding probabilities $p_i$, the expectation is: $\mathsf{E}(X) =
 An useful law relating to expectation is the Law of Large Numbers: as the number
 of independent trials increases, the sample mean converges to the expected
 value.
+
+## Realization (Sample Path or Trajectory) and Expectation of Supremum
+
+At first, I feel like expectation of supremum,
+$\mathsf{E}\space\text{sup}(X_t)_{t \in T}$, doesn't make sense. The reason is
+that I thought of the process is equivalent to a set of numbers. For a set of
+number, we can always determine the $\text{max}$ of the set. However, it is not
+the right analogy. The set is actually equivalent to a "realization" (or sample
+path, or trajectory) of the process. It means the stochastic process is more
+like a "factory" of set of numbers.
 
 ## Centered Processes
 
@@ -198,4 +225,55 @@ estimate or approximate some theoretical quantity.
 ## Selector Processes
 
 <Aside type="caution">TODO: do more researching.</Aside>
+
+## Increment Condition
+
+An "increment condition" for a random process is a way to describe how much the
+process can change (or "increment") between two different points.
+
+Imagine you're tracking the temperature throughout the day. The "increment
+condition" would tell you how much the temperature might change between any two
+times. For example, it might say that the temperature is very unlikely to change
+by more than 5 degrees in any 1-hour period.
+
+The book provided a formula:
+
+$$
+\forall u > 0, P(|X_s - X_t| \geq u) \leq 2 \exp(-\frac{u^2}{2d(s,t)^2})
+$$
+
+Where $d$ is a distance on $T$. 
+
+## Markov's Inequality
+
+For a non-negative random variable X and for any positive number a,
+
+$$
+\mathsf{P}(X \geq a) \leq \frac{\mathsf{E} X}{a}
+$$
+
+Let's consider a simple, concrete example to illustrate the use of Markov's
+Inequality. Suppose we know that the average study time for students in a class
+is 3 hours per day. We want to estimate the probability that a randomly selected
+student studies for 6 or more hours in a day.
+
+Given:
+
+- Let $X$ be the random variable representing a student's study time in hours
+- $\mathsf{E} X = 3$
+- We want to find $\mathsf{P}(X \geq 6)$
+
+We can set $a = 6$ and calculate:
+
+$$
+\mathsf{P}(X \geq 6) \leq\space \frac{\mathsf{E}X}{a} = \frac{3}{6} = 0.5
+$$
+
+Some key points:
+
+- This is an upper bound. The actual probability could be much lower.
+- We derived this using only the average, without knowing anything else about
+  the distribution of study times.
+- This bound is not very tight for values close to the mean, but it can be quite
+  useful for values significantly above the mean.
 
