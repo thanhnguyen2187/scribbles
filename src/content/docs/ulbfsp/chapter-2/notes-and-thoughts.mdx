@@ -77,7 +77,7 @@ The intuition behind it can be explained like this:
 > have the formula:
 >
 > $$
-> \mathsf{E}Y = \int_0^{\infty} \mathsf{P}(Y \geq u)\text{d}x
+> \mathsf{E}Y = \int_0^{\infty} \mathsf{P}(Y \geq u)\text{d}u
 > $$
 
 The author did not elaborate what is $P$, but P denotes probability, and the
@@ -91,6 +91,40 @@ $$
 \mathsf{P}(Y \geq a) \leq \frac{\mathsf{E} Y}{a}
 $$
 
-And a consequence
+Another interesting formula is the union bound:
 
+$$
+\mathsf{P}(\text{sup}_{t \in T}(X_t - X_{t_0}) \geq u) \leq \sum_{t \in T} \mathsf{P} (X_t - X_{t_0} \geq u)
+$$
+
+I found that there is a same-named inequality (Boole's inequality) and wondered
+is there any relation. Anyway, the way we come up with the union bound is like
+this:
+
+- At first, we look at Markov's inequality and its variation:
+
+$$
+\mathsf{P}(Y \geq u) \leq \frac{\mathsf{E}Y}{u}
+$$
+
+- Using the formula for nonnegativer $Y$:
+
+$$
+\mathsf{P}(Y \geq u) \leq
+\frac{\int_0^{\infty} \mathsf{P}(Y \geq v)\text{d}v}{u}
+$$
+
+- Substitute $Y$ with $\text{sup}_{t \in T}(X_t - X_{t_0})$:
+
+$$
+\mathsf{P}(\text{sup}_{t \in T}(X_t - X_{t_0}) \geq u) \leq
+\frac{\mathsf{E}\space\text{sup}_{t \in T}(X_t - X_{t_0})}{u}
+$$
+
+- Look at the right side:
+
+$$
+\frac{\mathsf{E}\space\text{sup}_{t \in T}(X_t - X_{t_0})}{u}
+= \int_0^{\infty}\frac{\mathsf{P}(\text{sup}_{t \in T}(X_t - X_{t_0}) \geq u)\text{d}u}{u}
+$$
 
